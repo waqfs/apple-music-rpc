@@ -1,0 +1,9 @@
+[package]
+name = "apple-music-rpc"
+version = "0.0.1"
+edition = "2024"
+description = "Apple Music RPC daemon for macOS"
+repository = "https://github.com/waqfs/apple-music-rpc"
+license = "GPL-3.0"
+
+[dependencies]
