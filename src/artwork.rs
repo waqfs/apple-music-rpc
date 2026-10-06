@@ -5,12 +5,13 @@ use ureq::Agent;
 
 use crate::{config::Config, music::TrackState};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct SearchResponse {
     results: Vec<SearchResult>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct SearchResult {
     track_name: Option<String>,
     artist_name: Option<String>,
@@ -53,7 +54,31 @@ impl ArtworkResolver {
             .read_json()
             .map_err(|e| format!("error: artwork request returned malformed json: {e}"))?;
 
-        println!("search results: {:?}", body.results);
+        let exact_match = body.results.clone().into_iter().find(|result| {
+            let name_match = result
+                .track_name
+                .as_ref()
+                .map(|name| name.eq_ignore_ascii_case(&track.name))
+                .unwrap_or(false);
+            let artist_match = result
+                .artist_name
+                .as_ref()
+                .map(|artist| artist.eq_ignore_ascii_case(&track.artist))
+                .unwrap_or(false);
+            let album_match = result
+                .collection_name
+                .as_ref()
+                .map(|album| album.eq_ignore_ascii_case(&track.album))
+                .unwrap_or(false);
+
+            name_match && artist_match && album_match
+        });
+
+        if exact_match.is_some() {
+            println!("found exact match: {:?}", exact_match);
+        } else {
+            println!("search results: {:?}", body.results);
+        }
 
         Err("not implemented".to_string())
     }
