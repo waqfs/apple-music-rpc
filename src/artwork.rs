@@ -1,8 +1,24 @@
 use std::println;
 
+use serde::Deserialize;
 use ureq::Agent;
 
 use crate::{config::Config, music::TrackState};
+
+#[derive(Debug, Deserialize)]
+struct SearchResponse {
+    results: Vec<SearchResult>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SearchResult {
+    track_name: Option<String>,
+    artist_name: Option<String>,
+    collection_name: Option<String>,
+    track_view_url: Option<String>,
+    artwork_uri100: Option<String>,
+    track_time_millis: Option<u64>,
+}
 
 pub struct ArtworkResolver {
     agent: Agent,
@@ -32,7 +48,12 @@ impl ArtworkResolver {
             .call()
             .map_err(|e| format!("error: artwork request failed: {e}"))?;
 
-        println!("response: {:?}", response);
+        let body: SearchResponse = response
+            .body_mut()
+            .read_json()
+            .map_err(|e| format!("error: artwork request returned malformed json: {e}"))?;
+
+        println!("search results: {:?}", body.results);
 
         Err("not implemented".to_string())
     }
