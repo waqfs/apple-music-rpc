@@ -6,6 +6,9 @@ use objc2::{
 use objc2_foundation::NSString;
 use serde::Serialize;
 
+#[link(name = "ScriptingBridge", kind = "framework")]
+unsafe extern "C" {}
+
 const PLAYER_STOPPED: u32 = 0x6b50_5353; // kPSS
 const PLAYER_PLAYING: u32 = 0x6b50_5350; // kPSP
 const PLAYER_PAUSED: u32 = 0x6b50_5370; // kPSp
