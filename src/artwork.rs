@@ -1,4 +1,4 @@
-use std::{ops::Mul, println};
+use std::{ops::Mul, println, time::Duration};
 
 use serde::Deserialize;
 use ureq::Agent;
@@ -31,7 +31,12 @@ pub struct ArtworkResolver {
 impl ArtworkResolver {
     pub fn new(config: &Config) -> Self {
         Self {
-            agent: Agent::new_with_defaults(),
+            agent: Agent::config_builder()
+                .timeout_global(Some(Duration::from_secs(
+                    config.apple_music.timeout_seconds,
+                )))
+                .build()
+                .new_agent(),
             user_agent: concat!("apple-music-rpc/", env!("CARGO_PKG_VERSION")).to_string(),
             resolution: config.apple_music.artwork_resolution,
             results_limit: config.apple_music.query_results_limit,
