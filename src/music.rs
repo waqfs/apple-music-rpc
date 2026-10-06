@@ -73,7 +73,23 @@ impl AppleMusicBridge {
             return Ok(MusicState { state, track: None });
         }
 
-        Err("not implemented".to_string())
+        let track = self.get_current_track()?;
+        let name = self.get_current_track_name(track.clone())?;
+        let artist = self.get_current_track_artist(track.clone())?;
+        let album = self.get_current_track_album(track.clone())?;
+        let duration = self.get_current_track_duration(track.clone())?;
+        let progress = self.get_current_track_progress()?;
+
+        Ok(MusicState {
+            state,
+            track: Some(TrackState {
+                name,
+                artist,
+                album,
+                duration,
+                progress,
+            }),
+        })
     }
 
     pub fn is_running(&self) -> bool {
