@@ -4,4 +4,5 @@
 [activity]
 
 [apple_music]
+artwork_resolution = 512
 query_results_limit = 20

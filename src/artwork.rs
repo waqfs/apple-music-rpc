@@ -24,6 +24,7 @@ struct SearchResult {
 pub struct ArtworkResolver {
     agent: Agent,
     user_agent: String,
+    resolution: u32,
     results_limit: u32,
 }
 
@@ -32,6 +33,7 @@ impl ArtworkResolver {
         Self {
             agent: Agent::new_with_defaults(),
             user_agent: concat!("apple-music-rpc/", env!("CARGO_PKG_VERSION")).to_string(),
+            resolution: config.apple_music.artwork_resolution,
             results_limit: config.apple_music.query_results_limit,
         }
     }
@@ -93,9 +95,16 @@ impl ArtworkResolver {
         let artwork_url = exact_match
             .and_then(|result| result.artwork_url100)
             .ok_or_else(|| "error: failed to resolve artwork for the current track".to_string())?;
+        let artwork_url = resize_artwork_url(&artwork_url, self.resolution);
 
         Ok(artwork_url)
     }
+}
+
+fn resize_artwork_url(url: &str, size: u32) -> String {
+    let size_str = format!("{size}x{size}");
+    url.replace("100x100bb.jpg", &format!("{size_str}bb.jpg"))
+        .replace("100x100bb.png", &format!("{size_str}bb.png"))
 }
 
 fn clean_string(text: &str) -> String {

@@ -21,6 +21,7 @@ pub struct ActivityConfig {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppleMusicConfig {
+    pub artwork_resolution: u32,
     pub query_results_limit: u32,
 }
 
