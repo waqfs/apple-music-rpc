@@ -7,5 +7,7 @@ repository = "https://github.com/waqfs/apple-music-rpc"
 license = "GPL-3.0"
 
 [dependencies]
+objc2 = "0.6.5"
+objc2-foundation = "0.3.2"
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.6"

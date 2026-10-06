@@ -1,8 +1,9 @@
 use std::{env, path::PathBuf};
 
-use crate::config::Config;
+use crate::{config::Config, music::AppleMusicBridge};
 
 mod config;
+mod music;
 
 fn main() {
     main2().unwrap_or_else(|err| {
@@ -15,6 +16,11 @@ fn main2() -> Result<(), String> {
     let args: Vec<String> = env::args().skip(1).collect();
     let config_path = get_custom_config_path(&args)?.unwrap_or(Config::default_path()?);
     let config = Config::get(&config_path)?;
+
+    let music = AppleMusicBridge::new()?;
+    let state = music.get_state()?;
+    println!("Current state: {:?}", state);
+
     Ok(())
 }
 
