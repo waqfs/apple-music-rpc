@@ -3,6 +3,7 @@ use std::{env, path::PathBuf};
 use crate::config::Config;
 
 mod config;
+mod music;
 
 fn main() {
     main2().unwrap_or_else(|err| {
