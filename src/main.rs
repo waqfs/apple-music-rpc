@@ -1,7 +1,8 @@
 use std::{env, path::PathBuf};
 
-use crate::{config::Config, music::AppleMusicBridge};
+use crate::{artwork::ArtworkResolver, config::Config, music::AppleMusicBridge};
 
+mod artwork;
 mod config;
 mod music;
 
@@ -20,6 +21,13 @@ fn main2() -> Result<(), String> {
     let music = AppleMusicBridge::new()?;
     let state = music.get_state()?;
     println!("Current state: {:?}", state);
+
+    let artwork_resolver = ArtworkResolver::new(&config);
+    let url = match state.track {
+        Some(track) => artwork_resolver.resolve(&track)?,
+        _ => Err("error: failed to get track".to_string())?,
+    };
+    println!("Artwork URL: {}", url);
 
     Ok(())
 }

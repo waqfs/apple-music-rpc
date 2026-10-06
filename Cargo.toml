@@ -11,3 +11,4 @@ objc2 = "0.6.5"
 objc2-foundation = "0.3.2"
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.6"
+ureq = { version = "3.4.2", features = ["json"] }

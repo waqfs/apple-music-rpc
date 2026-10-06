@@ -1,1 +1,9 @@
 # default configuration for waqfs/apple-music-rpc
+[discord]
+
+[activity]
+
+[apple_music]
+artwork_resolution = 512
+timeout_seconds = 5
+query_results_limit = 20
