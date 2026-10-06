@@ -37,7 +37,11 @@ impl ArtworkResolver {
     }
 
     pub fn resolve(&self, track: &TrackState) -> Result<String, String> {
-        let search_query = format!("{} {}", track.name, track.artist);
+        let cleaned_track_name = clean_string(&track.name);
+        let squished_track_name = squished_string(&track.name);
+        let cleaned_track_album = clean_string(&track.album);
+        let squished_track_album = squished_string(&track.album);
+        let search_query = format!("{} {}", cleaned_track_name, track.artist);
         let mut response = self
             .agent
             .get("https://itunes.apple.com/search")
@@ -58,7 +62,11 @@ impl ArtworkResolver {
             let name_match = result
                 .track_name
                 .as_ref()
-                .map(|name| name.eq_ignore_ascii_case(&track.name))
+                .map(|name| {
+                    name.eq_ignore_ascii_case(&track.name)
+                        || name.eq_ignore_ascii_case(&cleaned_track_name)
+                        || name.eq_ignore_ascii_case(&squished_track_name)
+                })
                 .unwrap_or(false);
             let artist_match = result
                 .artist_name
@@ -68,7 +76,11 @@ impl ArtworkResolver {
             let album_match = result
                 .collection_name
                 .as_ref()
-                .map(|album| album.eq_ignore_ascii_case(&track.album))
+                .map(|album| {
+                    album.eq_ignore_ascii_case(&track.album)
+                        || album.eq_ignore_ascii_case(&cleaned_track_album)
+                        || album.eq_ignore_ascii_case(&squished_track_album)
+                })
                 .unwrap_or(false);
 
             name_match && artist_match && album_match
@@ -82,4 +94,22 @@ impl ArtworkResolver {
 
         Err("not implemented".to_string())
     }
+}
+
+fn clean_string(text: &str) -> String {
+    let mut result = String::new();
+    let mut nested_level = 0;
+    for c in text.chars() {
+        match c {
+            '(' => nested_level += 1,
+            ')' if nested_level > 0 => nested_level -= 1,
+            _ if nested_level == 0 => result.push(c),
+            _ => {}
+        }
+    }
+    result.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn squished_string(name: &str) -> String {
+    name.split_whitespace().collect::<Vec<_>>().join("")
 }
