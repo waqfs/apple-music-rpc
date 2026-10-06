@@ -4,6 +4,7 @@ use objc2::{
     runtime::{AnyClass, AnyObject},
 };
 use objc2_foundation::NSString;
+use serde::Serialize;
 
 const PLAYER_STOPPED: u32 = 0x6b50_5353; // kPSS
 const PLAYER_PLAYING: u32 = 0x6b50_5350; // kPSP
@@ -11,18 +12,20 @@ const PLAYER_PAUSED: u32 = 0x6b50_5370; // kPSp
 const PLAYER_FAST_FORWARDING: u32 = 0x6b50_5346; // kPSF
 const PLAYER_REWINDING: u32 = 0x6b50_5352; // kPSR
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum PlaybackState {
     Playing,
     Paused,
     Stopped,
 }
 
+#[derive(Debug, Clone, Serialize)]
 pub struct MusicState {
     pub state: PlaybackState,
     pub track: Option<TrackState>,
 }
 
+#[derive(Debug, Clone, Serialize)]
 pub struct TrackState {
     pub name: String,
     pub artist: String,
