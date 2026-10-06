@@ -1,4 +1,4 @@
-use std::println;
+use std::{ops::Mul, println};
 
 use serde::Deserialize;
 use ureq::Agent;
@@ -41,9 +41,7 @@ impl ArtworkResolver {
     pub fn resolve(&self, track: &TrackState) -> Result<String, String> {
         let cleaned_track_name = clean_string(&track.name);
         let squished_track_name = squished_string(&track.name);
-        let cleaned_track_album = clean_string(&track.album);
-        let squished_track_album = squished_string(&track.album);
-        let search_query = format!("{} {}", cleaned_track_name, track.artist);
+        let search_query = format!("{} {}", track.name, track.artist);
         let mut response = self
             .agent
             .get("https://itunes.apple.com/search")
@@ -63,7 +61,7 @@ impl ArtworkResolver {
         let exact_match = body
             .results
             .into_iter()
-            .filter(|result| result.artwork_url100.is_some())
+            // .filter(|result| result.artwork_url100.is_some())
             .find(|result| {
                 let name_match = result
                     .track_name
@@ -79,17 +77,15 @@ impl ArtworkResolver {
                     .as_ref()
                     .map(|artist| artist.eq_ignore_ascii_case(&track.artist))
                     .unwrap_or(false);
-                let album_match = result
-                    .collection_name
+                let duration_match = result
+                    .track_time_millis
                     .as_ref()
-                    .map(|album| {
-                        album.eq_ignore_ascii_case(&track.album)
-                            || album.eq_ignore_ascii_case(&cleaned_track_album)
-                            || album.eq_ignore_ascii_case(&squished_track_album)
+                    .map(|time_millis| {
+                        time_millis.abs_diff(track.duration.mul(1000 as f64) as u64) <= 3000
                     })
                     .unwrap_or(false);
 
-                name_match && artist_match && album_match
+                name_match && artist_match && duration_match
             });
 
         let artwork_url = exact_match
