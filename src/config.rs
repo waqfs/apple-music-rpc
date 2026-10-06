@@ -20,7 +20,9 @@ pub struct DiscordConfig {}
 pub struct ActivityConfig {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AppleMusicConfig {}
+pub struct AppleMusicConfig {
+    pub query_results_limit: u32,
+}
 
 impl Config {
     pub fn default_path() -> Result<PathBuf, String> {

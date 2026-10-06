@@ -1,1 +1,3 @@
 # default configuration for waqfs/apple-music-rpc
+[apple-music]
+query_results_limit = 20
