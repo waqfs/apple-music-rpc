@@ -5,6 +5,32 @@ use objc2::{
 };
 use objc2_foundation::NSString;
 
+const PLAYER_STOPPED: u32 = 0x6b50_5353; // kPSS
+const PLAYER_PLAYING: u32 = 0x6b50_5350; // kPSP
+const PLAYER_PAUSED: u32 = 0x6b50_5370; // kPSp
+const PLAYER_FAST_FORWARDING: u32 = 0x6b50_5346; // kPSF
+const PLAYER_REWINDING: u32 = 0x6b50_5352; // kPSR
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum PlaybackState {
+    Playing,
+    Paused,
+    Stopped,
+}
+
+pub struct MusicState {
+    pub state: PlaybackState,
+    pub track: Option<TrackState>,
+}
+
+pub struct TrackState {
+    pub name: String,
+    pub artist: String,
+    pub album: String,
+    pub duration: f64,
+    pub progress: f64,
+}
+
 pub struct AppleMusicBridge {
     app: Retained<AnyObject>,
 }
@@ -21,11 +47,33 @@ impl AppleMusicBridge {
         Ok(Self { app })
     }
 
+    pub fn get_state(&self) -> Result<MusicState, String> {
+        if !self.is_running() {
+            return Ok(MusicState {
+                state: PlaybackState::Stopped,
+                track: None,
+            });
+        }
+
+        let state = match self.get_player_state() {
+            PLAYER_PLAYING | PLAYER_FAST_FORWARDING | PLAYER_REWINDING => PlaybackState::Playing,
+            PLAYER_PAUSED => PlaybackState::Paused,
+            PLAYER_STOPPED => PlaybackState::Stopped,
+            _ => PlaybackState::Stopped,
+        };
+
+        if state != PlaybackState::Playing {
+            return Ok(MusicState { state, track: None });
+        }
+
+        Err("not implemented".to_string())
+    }
+
     pub fn is_running(&self) -> bool {
         unsafe { msg_send![&*self.app, isRunning] }
     }
 
-    pub fn get_state(&self) -> u32 {
+    pub fn get_player_state(&self) -> u32 {
         unsafe { msg_send![&*self.app, playerState] }
     }
 
