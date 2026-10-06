@@ -17,7 +17,7 @@ struct SearchResult {
     artist_name: Option<String>,
     collection_name: Option<String>,
     track_view_url: Option<String>,
-    artwork_uri100: Option<String>,
+    artwork_url100: Option<String>,
     track_time_millis: Option<u64>,
 }
 
@@ -61,7 +61,7 @@ impl ArtworkResolver {
         let exact_match = body
             .results
             .into_iter()
-            .filter(|result| result.artwork_uri100.is_some())
+            .filter(|result| result.artwork_url100.is_some())
             .find(|result| {
                 let name_match = result
                     .track_name
@@ -91,7 +91,7 @@ impl ArtworkResolver {
             });
 
         let artwork_url = exact_match
-            .and_then(|result| result.artwork_uri100)
+            .and_then(|result| result.artwork_url100)
             .ok_or_else(|| "error: failed to resolve artwork for the current track".to_string())?;
 
         Ok(artwork_url)
