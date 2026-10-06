@@ -9,6 +9,7 @@ use serde::Serialize;
 #[link(name = "ScriptingBridge", kind = "framework")]
 unsafe extern "C" {}
 
+const MUSIC_BUNDLE_ID: &str = "com.apple.Music";
 const PLAYER_STOPPED: u32 = 0x6b50_5353; // kPSS
 const PLAYER_PLAYING: u32 = 0x6b50_5350; // kPSP
 const PLAYER_PAUSED: u32 = 0x6b50_5370; // kPSp
@@ -46,7 +47,7 @@ impl AppleMusicBridge {
         let clazz = AnyClass::get(c"SBApplication")
             .ok_or_else(|| "error: SBApplication class is not available".to_string())?;
 
-        let bundle_id = NSString::from_str("com.apple.Music");
+        let bundle_id = NSString::from_str(MUSIC_BUNDLE_ID);
         let app: Option<Retained<AnyObject>> =
             unsafe { msg_send![clazz, applicationWithBundleIdentifier: &*bundle_id] };
         let app = app.ok_or_else(|| "error: failed to bridge the Apple Music app".to_string())?;
