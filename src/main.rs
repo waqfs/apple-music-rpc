@@ -1,8 +1,10 @@
 use std::{env, path::PathBuf, sync::mpsc};
 
-use crate::{artwork::ArtworkResolver, config::Config, music::bridge::AppleMusicBridge};
+use crate::{
+    config::Config,
+    music::{artwork::ArtworkResolver, bridge::AppleMusicBridge},
+};
 
-mod artwork;
 mod config;
 mod discord;
 mod music;

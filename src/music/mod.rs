@@ -9,12 +9,15 @@ use std::{
 };
 
 use crate::{
-    artwork::ArtworkResolver,
     config::Config,
     discord::{DiscordIPC, activity::json_activity},
-    music::bridge::{AppleMusicBridge, PlaybackState},
+    music::{
+        artwork::ArtworkResolver,
+        bridge::{AppleMusicBridge, PlaybackState},
+    },
 };
 
+pub mod artwork;
 pub mod bridge;
 pub mod notification;
 
