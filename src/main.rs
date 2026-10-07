@@ -4,6 +4,7 @@ use crate::{artwork::ArtworkResolver, config::Config, music::AppleMusicBridge};
 
 mod artwork;
 mod config;
+mod discord;
 mod music;
 
 fn main() {
