@@ -1,6 +1,6 @@
 use std::{
     eprintln,
-    sync::{Arc, atomic::AtomicI64},
+    sync::{Arc, atomic::AtomicI64, mpsc::Receiver},
     thread,
 };
 
@@ -10,14 +10,14 @@ pub mod bridge;
 
 const NO_TRACK_ID: i64 = i64::MIN;
 
-pub fn spawn_music_thread(config: Config) {
+pub fn spawn_music_thread(config: Config, rx: Receiver<()>) {
     thread::Builder::new()
         .name("music-notifier".to_string())
-        .spawn(move || music_thread(config))
+        .spawn(move || music_thread(config, rx))
         .expect("error: failed to spawn music-notifier thread");
 }
 
-fn music_thread(config: Config) {
+fn music_thread(config: Config, rx: Receiver<()>) {
     let bridge = match AppleMusicBridge::new() {
         Ok(v) => v,
         Err(e) => {
