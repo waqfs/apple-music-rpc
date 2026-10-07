@@ -8,11 +8,11 @@ pub enum ActivityPresence {
     Empty,
 }
 
-pub struct DiscordActivity {
-    tx: Sender<ActivityPresence>,
+pub struct DiscordIPC {
+    pub tx: Sender<ActivityPresence>,
 }
 
-impl DiscordActivity {
+impl DiscordIPC {
     pub fn set_activity(&self, activity: Value) {
         self.tx.send(ActivityPresence::Set(activity));
     }
