@@ -11,7 +11,7 @@ use crate::{
     discord::{activity::ActivityPresence, ipc::DiscordSocket},
 };
 
-mod activity;
+pub mod activity;
 mod ipc;
 
 pub struct DiscordIPC {
