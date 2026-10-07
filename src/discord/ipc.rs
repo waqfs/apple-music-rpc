@@ -2,7 +2,7 @@ use std::{
     env,
     io::{
         Error,
-        ErrorKind::{InvalidData, InvalidInput, NotFound},
+        ErrorKind::{ConnectionAborted, InvalidData, InvalidInput, NotFound},
         Read, Result, Write,
     },
     os::unix::net::UnixStream,
@@ -53,9 +53,24 @@ impl DiscordSocket {
         loop {
             let (op, payload) = self.read_frame()?;
             match op {
-                OP_FRAME => return Ok(()),
-                OP_PING => return Ok(()),
-                OP_CLOSE => return Ok(()),
+                OP_FRAME => {
+                    if payload.get("evt").and_then(Value::as_str) == Some("ERROR") {
+                        return Err(Error::new(
+                            InvalidData,
+                            format!("error: discord ipc error: {payload}"),
+                        ));
+                    }
+                    if payload.get("nonce").and_then(Value::as_str) == Some(nonce) {
+                        return Ok(());
+                    }
+                }
+                OP_PING => self.write_json(OP_PONG, &payload)?,
+                OP_CLOSE => {
+                    return Err(Error::new(
+                        ConnectionAborted,
+                        format!("error: discord ipc closed: {payload}"),
+                    ));
+                }
                 _ => {}
             }
         }
