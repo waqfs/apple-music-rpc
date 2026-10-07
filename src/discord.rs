@@ -1,16 +1,21 @@
 use std::{
-    collections::HashSet,
     env,
-    io::Result,
+    io::{
+        Error,
+        ErrorKind::{InvalidData, InvalidInput, NotFound},
+        Read, Result, Write,
+    },
     os::unix::net::UnixStream,
     path::PathBuf,
     sync::mpsc::{Receiver, RecvTimeoutError, Sender},
     time::Duration,
 };
 
-use toml::Value;
+use serde_json::Value;
 
 use crate::config::DiscordConfig;
+
+const MAX_FRAME_SIZE: usize = 65_536;
 
 #[derive(Debug, Clone)]
 enum ActivityPresence {
@@ -53,10 +58,45 @@ impl DiscordSocket {
                 }
             }
         }
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            "error: no discord-ipc socket found",
-        ));
+        return Err(Error::new(NotFound, "error: no discord-ipc socket found"));
+    }
+
+    fn write_json(&mut self, op: u32, payload: &Value) -> Result<()> {
+        let payload = serde_json::to_vec(payload).map_err(|e| Error::new(InvalidData, e))?;
+        if payload.len() > MAX_FRAME_SIZE {
+            return Err(Error::new(
+                InvalidInput,
+                "error: discord ipc payload too large",
+            ));
+        }
+
+        let mut frame = Vec::with_capacity(8 + payload.len());
+        frame.extend_from_slice(&op.to_le_bytes());
+        frame.extend_from_slice(&(payload.len() as u32).to_le_bytes());
+        frame.extend_from_slice(&payload);
+        self.stream.write_all(&frame)
+    }
+
+    fn read_frame(&mut self) -> Result<(u32, Value)> {
+        let mut header = [0u8; 8];
+        self.stream.read_exact(&mut header)?;
+        let op = u32::from_le_bytes(header[0..4].try_into().unwrap());
+        let len = u32::from_le_bytes(header[4..8].try_into().unwrap()) as usize;
+        if len > MAX_FRAME_SIZE {
+            return Err(Error::new(
+                InvalidData,
+                "error: discord ipc frame too large",
+            ));
+        }
+
+        let mut payload = vec![0u8; len];
+        self.stream.read_exact(&mut payload)?;
+        let value = if payload.is_empty() {
+            Value::Null
+        } else {
+            serde_json::from_slice(&payload).map_err(|e| Error::new(InvalidData, e))?
+        };
+        Ok((op, value))
     }
 }
 
