@@ -1,5 +1,7 @@
 # default configuration for waqfs/apple-music-rpc
 [discord]
+ping_interval_seconds = 15
+reconnect_interval_seconds = 5
 
 [activity]
 
