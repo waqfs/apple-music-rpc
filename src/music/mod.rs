@@ -1,5 +1,5 @@
 use std::{
-    eprintln,
+    eprintln, println,
     sync::{Arc, atomic::AtomicI64, mpsc::Receiver},
     thread,
 };
@@ -7,6 +7,7 @@ use std::{
 use crate::{artwork::ArtworkResolver, config::Config, music::bridge::AppleMusicBridge};
 
 pub mod bridge;
+pub mod notification;
 
 const NO_TRACK_ID: i64 = i64::MIN;
 
@@ -29,4 +30,8 @@ fn music_thread(config: Config, rx: Receiver<()>) {
 
     let current_track_id = Arc::new(AtomicI64::new(NO_TRACK_ID));
     let mut last_track_id: Option<i64> = None;
+
+    while rx.recv().is_ok() {
+        println!("song update");
+    }
 }
