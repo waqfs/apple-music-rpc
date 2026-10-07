@@ -14,7 +14,11 @@ pub struct Config {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DiscordConfig {}
+pub struct DiscordConfig {
+    pub client_id: String,
+    pub ping_interval_seconds: u64,
+    pub reconnect_interval_seconds: u64,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ActivityConfig {}
