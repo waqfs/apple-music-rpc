@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-use serde_json::Value;
+use serde_json::{Value, json};
 
 const MAX_FRAME_SIZE: usize = 65_536;
 const OP_HANDSHAKE: u32 = 0;
@@ -41,6 +41,34 @@ impl DiscordSocket {
             }
         }
         return Err(Error::new(NotFound, "error: no discord-ipc socket found"));
+    }
+
+    fn ping(&mut self) -> Result<()> {
+        let payload = json!({ "nonce": &self.next_nonce() });
+        self.write_json(OP_PING, &payload)?;
+
+        loop {
+            let (op, response) = self.read_frame()?;
+            match op {
+                OP_PONG => return Ok(()),
+                OP_PING => self.write_json(OP_PONG, &response)?,
+                OP_CLOSE => {
+                    return Err(Error::new(
+                        ConnectionAborted,
+                        format!("error: discord ipc closed: {response}"),
+                    ));
+                }
+                OP_FRAME => {
+                    if response.get("evt").and_then(Value::as_str) == Some("ERROR") {
+                        return Err(Error::new(
+                            InvalidData,
+                            format!("error: discord ipc error: {response}"),
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        }
     }
 
     fn next_nonce(&mut self) -> String {
