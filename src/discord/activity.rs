@@ -2,7 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::{Map, Value, json};
 
-use crate::{config::ActivityConfig, music::TrackState};
+use crate::{config::ActivityConfig, music::bridge::TrackState};
 
 #[derive(Debug, Clone)]
 pub enum ActivityPresence {

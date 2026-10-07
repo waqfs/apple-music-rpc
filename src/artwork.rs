@@ -1,9 +1,9 @@
-use std::{ops::Mul, println, time::Duration};
+use std::{ops::Mul, time::Duration};
 
 use serde::Deserialize;
 use ureq::Agent;
 
-use crate::{config::Config, music::TrackState};
+use crate::{config::Config, music::bridge::TrackState};
 
 #[derive(Debug, Clone, Deserialize)]
 struct SearchResponse {

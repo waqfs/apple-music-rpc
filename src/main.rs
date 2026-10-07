@@ -1,6 +1,6 @@
 use std::{env, path::PathBuf};
 
-use crate::{artwork::ArtworkResolver, config::Config, music::AppleMusicBridge};
+use crate::{artwork::ArtworkResolver, config::Config, music::bridge::AppleMusicBridge};
 
 mod artwork;
 mod config;
