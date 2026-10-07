@@ -28,7 +28,7 @@ pub struct DiscordSocket {
 }
 
 impl DiscordSocket {
-    fn connect(client_id: &str) -> Result<Self> {
+    pub fn connect(client_id: &str) -> Result<Self> {
         for dir in possible_ipc_paths() {
             for index in 0..10 {
                 let path = dir.join(format!("discord-ipc-{}", index));
@@ -107,7 +107,7 @@ impl DiscordSocket {
         }
     }
 
-    fn presence(&mut self, presence: &ActivityPresence) -> Result<()> {
+    pub fn presence(&mut self, presence: &ActivityPresence) -> Result<()> {
         let nonce = self.next_nonce();
         let activity = match presence {
             ActivityPresence::Empty => Value::Null,
