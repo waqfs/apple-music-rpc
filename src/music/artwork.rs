@@ -21,6 +21,7 @@ struct SearchResult {
     track_time_millis: Option<u64>,
 }
 
+#[derive(Clone)]
 pub struct ArtworkResolver {
     agent: Agent,
     user_agent: String,

@@ -6,6 +6,7 @@ use std::{
         mpsc::Receiver,
     },
     thread,
+    time::Instant,
 };
 
 use crate::{
@@ -13,7 +14,7 @@ use crate::{
     discord::{DiscordIPC, activity::json_activity},
     music::{
         artwork::ArtworkResolver,
-        bridge::{AppleMusicBridge, PlaybackState},
+        bridge::{AppleMusicBridge, PlaybackState, TrackState},
     },
 };
 
@@ -59,13 +60,10 @@ fn music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
 
                     current_track_id.store(track.local_id, Release);
 
-                    let url = match artwork_resolver.resolve(&track) {
-                        Ok(url) => Some(url),
-                        Err(_) => None,
-                    };
-
-                    let activity = json_activity(&config.activity, &track, url);
+                    let activity = json_activity(&config.activity, &track, None);
                     discord.set_activity(activity);
+
+                    spawn_artwork_thread(artwork_resolver.clone(), track.clone());
 
                     last_track_id = Some(track.local_id);
                 }
@@ -78,4 +76,19 @@ fn music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
             }
         }
     }
+}
+
+fn spawn_artwork_thread(resolver: ArtworkResolver, track: TrackState) {
+    thread::spawn(move || {
+        let start = Instant::now();
+        match resolver.resolve(&track) {
+            Ok(url) => {}
+            Err(e) => {
+                eprintln!(
+                    "error: failed to resolve artwork for track {}: {e}",
+                    track.name
+                );
+            }
+        }
+    });
 }
