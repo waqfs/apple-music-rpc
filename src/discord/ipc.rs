@@ -47,7 +47,7 @@ impl DiscordSocket {
         return Err(Error::new(NotFound, "error: no discord-ipc socket found"));
     }
 
-    fn ping(&mut self) -> Result<()> {
+    pub fn ping(&mut self) -> Result<()> {
         let payload = json!({ "nonce": &self.next_nonce() });
         self.write_json(OP_PING, &payload)?;
 
