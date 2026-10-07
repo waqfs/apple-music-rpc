@@ -8,17 +8,27 @@ mod discord;
 mod music;
 
 fn main() {
-    main2().unwrap_or_else(|err| {
+    daemon().unwrap_or_else(|err| {
         eprintln!("{}", err);
         std::process::exit(1);
     });
 }
 
-fn main2() -> Result<(), String> {
+fn daemon() -> Result<(), String> {
     let args: Vec<String> = env::args().skip(1).collect();
     let config_path = get_custom_config_path(&args)?.unwrap_or(Config::default_path()?);
     let config = Config::get(&config_path)?;
 
+    if args.iter().any(|str| str == "--debug") {
+        debug(config)?;
+        return Ok(());
+    }
+
+    let discord = discord::spawn_discord_thread(config.discord.clone());
+    Ok(())
+}
+
+fn debug(config: Config) -> Result<(), String> {
     let music = AppleMusicBridge::new()?;
     let state = music.get_state()?;
     println!("Current state: {:?}", state);
