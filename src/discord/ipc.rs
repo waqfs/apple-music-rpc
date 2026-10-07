@@ -71,6 +71,38 @@ impl DiscordSocket {
         }
     }
 
+    fn handshake(&mut self, client_id: &str) -> Result<()> {
+        self.write_json(OP_HANDSHAKE, &json!({"v": 1, "client_id": client_id}))?;
+
+        loop {
+            let (op, response) = self.read_frame()?;
+            match op {
+                OP_PING => self.write_json(OP_PONG, &response)?,
+                OP_CLOSE => {
+                    return Err(Error::new(
+                        ConnectionAborted,
+                        format!("error: discord ipc closed: {response}"),
+                    ));
+                }
+                OP_FRAME => {
+                    let evt = response.get("evt").and_then(Value::as_str);
+                    if response.get("cmd").and_then(Value::as_str) == Some("DISPATCH")
+                        && evt == Some("READY")
+                    {
+                        return Ok(());
+                    }
+                    if evt == Some("ERROR") {
+                        return Err(Error::new(
+                            InvalidData,
+                            format!("error: discord ipc error: {response}"),
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
     fn next_nonce(&mut self) -> String {
         let nonce = self.nonce;
         self.nonce = self.nonce.wrapping_add(1);
