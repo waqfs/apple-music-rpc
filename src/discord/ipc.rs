@@ -7,37 +7,14 @@ use std::{
     },
     os::unix::net::UnixStream,
     path::PathBuf,
-    sync::mpsc::{Receiver, RecvTimeoutError, Sender},
     time::Duration,
 };
 
 use serde_json::Value;
 
-use crate::config::DiscordConfig;
-
 const MAX_FRAME_SIZE: usize = 65_536;
 
-#[derive(Debug, Clone)]
-enum ActivityPresence {
-    Set(Value),
-    Empty,
-}
-
-pub struct DiscordActivity {
-    tx: Sender<ActivityPresence>,
-}
-
-impl DiscordActivity {
-    pub fn set_activity(&self, activity: Value) {
-        self.tx.send(ActivityPresence::Set(activity));
-    }
-
-    pub fn clear_activity(&self) {
-        self.tx.send(ActivityPresence::Empty);
-    }
-}
-
-struct DiscordSocket {
+pub struct DiscordSocket {
     stream: UnixStream,
     nonce: u64,
 }
@@ -97,29 +74,6 @@ impl DiscordSocket {
             serde_json::from_slice(&payload).map_err(|e| Error::new(InvalidData, e))?
         };
         Ok((op, value))
-    }
-}
-
-fn discord_thread(config: DiscordConfig, rx: Receiver<ActivityPresence>) {
-    let mut connection: Option<DiscordSocket> = None;
-    let ping_delay = Duration::from_secs(config.ping_interval_seconds);
-    let retry_delay = Duration::from_secs(config.reconnect_interval_seconds);
-    loop {
-        if connection.is_none() {
-            // connect
-        }
-
-        let wait: Duration = if connection.is_some() {
-            ping_delay
-        } else {
-            retry_delay
-        };
-
-        match rx.recv_timeout(wait) {
-            Ok(activity) => {}
-            Err(RecvTimeoutError::Timeout) => {}
-            Err(RecvTimeoutError::Disconnected) => return,
-        }
     }
 }
 
