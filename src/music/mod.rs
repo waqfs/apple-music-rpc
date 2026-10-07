@@ -4,21 +4,23 @@ use std::{
     thread,
 };
 
-use crate::{artwork::ArtworkResolver, config::Config, music::bridge::AppleMusicBridge};
+use crate::{
+    artwork::ArtworkResolver, config::Config, discord::DiscordIPC, music::bridge::AppleMusicBridge,
+};
 
 pub mod bridge;
 pub mod notification;
 
 const NO_TRACK_ID: i64 = i64::MIN;
 
-pub fn spawn_music_thread(config: Config, rx: Receiver<()>) {
+pub fn spawn_music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
     thread::Builder::new()
         .name("music-notifier".to_string())
-        .spawn(move || music_thread(config, rx))
+        .spawn(move || music_thread(config, rx, discord))
         .expect("error: failed to spawn music-notifier thread");
 }
 
-fn music_thread(config: Config, rx: Receiver<()>) {
+fn music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
     let bridge = match AppleMusicBridge::new() {
         Ok(v) => v,
         Err(e) => {

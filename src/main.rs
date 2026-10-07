@@ -27,7 +27,8 @@ fn daemon() -> Result<(), String> {
     let discord = discord::spawn_discord_thread(config.discord.clone());
 
     let (song_update_tx, song_update_rx) = mpsc::channel::<()>();
-    let music = music::spawn_music_thread(config, song_update_rx);
+    music::spawn_music_thread(config, song_update_rx, discord);
+    music::notification::notify_on_song_update(song_update_tx);
 
     Ok(())
 }
