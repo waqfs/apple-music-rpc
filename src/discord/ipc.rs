@@ -13,6 +13,11 @@ use std::{
 use serde_json::Value;
 
 const MAX_FRAME_SIZE: usize = 65_536;
+const OP_HANDSHAKE: u32 = 0;
+const OP_FRAME: u32 = 1;
+const OP_CLOSE: u32 = 2;
+const OP_PING: u32 = 3;
+const OP_PONG: u32 = 4;
 
 pub struct DiscordSocket {
     stream: UnixStream,
@@ -36,6 +41,24 @@ impl DiscordSocket {
             }
         }
         return Err(Error::new(NotFound, "error: no discord-ipc socket found"));
+    }
+
+    fn next_nonce(&mut self) -> String {
+        let nonce = self.nonce;
+        self.nonce = self.nonce.wrapping_add(1);
+        nonce.to_string()
+    }
+
+    fn read_until_nonce(&mut self, nonce: &str) -> Result<()> {
+        loop {
+            let (op, payload) = self.read_frame()?;
+            match op {
+                OP_FRAME => return Ok(()),
+                OP_PING => return Ok(()),
+                OP_CLOSE => return Ok(()),
+                _ => {}
+            }
+        }
     }
 
     fn write_json(&mut self, op: u32, payload: &Value) -> Result<()> {
