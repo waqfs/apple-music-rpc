@@ -37,6 +37,7 @@ impl DiscordSocket {
                         stream.set_read_timeout(Some(Duration::from_secs(3)))?;
                         stream.set_write_timeout(Some(Duration::from_secs(3)))?;
                         let mut connection = Self { stream, nonce: 1 };
+                        connection.handshake(client_id)?;
                         return Ok(connection);
                     }
                     Err(e) => return Err(e),
