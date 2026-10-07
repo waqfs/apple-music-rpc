@@ -1,19 +1,32 @@
 use std::{
-    sync::mpsc::{self, Receiver, RecvTimeoutError},
+    sync::mpsc::{self, Receiver, RecvTimeoutError, Sender},
     thread,
     time::{Duration, Instant},
 };
 
+use serde_json::Value;
+
 use crate::{
     config::DiscordConfig,
-    discord::{
-        activity::{ActivityPresence, DiscordIPC},
-        ipc::DiscordSocket,
-    },
+    discord::{activity::ActivityPresence, ipc::DiscordSocket},
 };
 
 mod activity;
 mod ipc;
+
+pub struct DiscordIPC {
+    pub tx: Sender<ActivityPresence>,
+}
+
+impl DiscordIPC {
+    pub fn set_activity(&self, activity: Value) {
+        self.tx.send(ActivityPresence::Set(activity));
+    }
+
+    pub fn clear_activity(&self) {
+        self.tx.send(ActivityPresence::Empty);
+    }
+}
 
 pub fn spawn_discord_thread(config: DiscordConfig) -> DiscordIPC {
     let (tx, rx) = mpsc::channel();
