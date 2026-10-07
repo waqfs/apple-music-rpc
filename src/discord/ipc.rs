@@ -7,10 +7,13 @@ use std::{
     },
     os::unix::net::UnixStream,
     path::PathBuf,
+    process,
     time::Duration,
 };
 
 use serde_json::{Value, json};
+
+use crate::discord::activity::ActivityPresence;
 
 const MAX_FRAME_SIZE: usize = 65_536;
 const OP_HANDSHAKE: u32 = 0;
@@ -101,6 +104,28 @@ impl DiscordSocket {
                 _ => {}
             }
         }
+    }
+
+    fn presence(&mut self, presence: &ActivityPresence) -> Result<()> {
+        let nonce = self.next_nonce();
+        let activity = match presence {
+            ActivityPresence::Empty => Value::Null,
+            ActivityPresence::Set(activity) => activity.clone(),
+        };
+
+        self.write_json(
+            OP_FRAME,
+            &json!({
+                "cmd": "SET_ACTIVITY",
+                "args": {
+                    "pid": &process::id(),
+                    "activity": activity,
+                },
+                "nonce": nonce
+            }),
+        )?;
+
+        self.read_until_nonce(&nonce)
     }
 
     fn next_nonce(&mut self) -> String {
