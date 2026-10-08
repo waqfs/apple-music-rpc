@@ -13,6 +13,8 @@ large_text_format = "{album}"
 # {title} - track title
 # {artist} - track artist
 # {album} - track album/collection
+# {duration} - track duration in mm:ss format
+# {duration_s} - track duration in seconds
 
 [apple_music]
 artwork_resolution = 512

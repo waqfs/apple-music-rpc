@@ -60,4 +60,13 @@ fn process_template(template: &str, track: &TrackState) -> String {
         .replace("{title}", &track.name)
         .replace("{artist}", &track.artist)
         .replace("{album}", &track.album)
+        .replace(
+            "{duration}",
+            &format!(
+                "{:.0}:{:02}",
+                track.duration as u64 / 60,
+                track.duration as u64 % 60
+            ),
+        )
+        .replace("{duration_s}", &track.duration.ceil().to_string())
 }
