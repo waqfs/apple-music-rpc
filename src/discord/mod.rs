@@ -14,6 +14,7 @@ use crate::{
 pub mod activity;
 mod ipc;
 
+#[derive(Clone)]
 pub struct DiscordIPC {
     pub tx: Sender<ActivityPresence>,
 }

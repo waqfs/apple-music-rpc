@@ -2,7 +2,10 @@ use std::{
     eprintln,
     sync::{
         Arc,
-        atomic::{AtomicI64, Ordering::Release},
+        atomic::{
+            AtomicI64,
+            Ordering::{Acquire, Release},
+        },
         mpsc::Receiver,
     },
     thread,
@@ -10,7 +13,7 @@ use std::{
 };
 
 use crate::{
-    config::Config,
+    config::{ActivityConfig, Config},
     discord::{DiscordIPC, activity::json_activity},
     music::{
         artwork::ArtworkResolver,
@@ -63,7 +66,17 @@ fn music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
                     let activity = json_activity(&config.activity, &track, None);
                     discord.set_activity(activity);
 
-                    spawn_artwork_thread(artwork_resolver.clone(), track.clone());
+                    if last_track_id == Some(track.local_id) {
+                        continue;
+                    }
+
+                    spawn_artwork_thread(
+                        artwork_resolver.clone(),
+                        track.clone(),
+                        config.activity.clone(),
+                        discord.clone(),
+                        Arc::clone(&current_track_id),
+                    );
 
                     last_track_id = Some(track.local_id);
                 }
@@ -78,11 +91,26 @@ fn music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
     }
 }
 
-fn spawn_artwork_thread(resolver: ArtworkResolver, track: TrackState) {
+fn spawn_artwork_thread(
+    resolver: ArtworkResolver,
+    mut track: TrackState,
+    config: ActivityConfig,
+    discord: DiscordIPC,
+    current_track_id: Arc<AtomicI64>,
+) {
     thread::spawn(move || {
         let start = Instant::now();
         match resolver.resolve(&track) {
-            Ok(url) => {}
+            Ok(url) => {
+                if current_track_id.load(Acquire) != track.local_id {
+                    return;
+                }
+                track.progress += start.elapsed().as_secs_f64();
+                if track.duration > 0.0 {
+                    track.progress = track.progress.min(track.duration);
+                }
+                discord.set_activity(json_activity(&config, &track, Some(url)));
+            }
             Err(e) => {
                 eprintln!(
                     "error: failed to resolve artwork for track {}: {e}",
