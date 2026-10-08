@@ -14,10 +14,13 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
     let mut activity: Map<String, Value> = Map::new();
     activity.insert("type".to_string(), json!(2));
     activity.insert("status_display_type".to_string(), json!(2));
-    activity.insert("details".to_string(), json!(&track.name));
+    activity.insert(
+        "details".to_string(),
+        json!(process_template(&config.details_format, &track)),
+    );
     activity.insert(
         "state".to_string(),
-        json!(format!("{} - {}", &track.artist, &track.album)),
+        json!(process_template(&config.state_format, &track)),
     );
 
     let now = SystemTime::now()
@@ -42,7 +45,7 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
                 "assets".to_string(),
                 json!({
                     "large_image": url,
-                    "large_text": &track.album,
+                    "large_text": process_template(&config.large_text_format, &track),
                 }),
             );
         }
@@ -50,4 +53,11 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
     }
 
     Value::Object(activity)
+}
+
+fn process_template(template: &str, track: &TrackState) -> String {
+    template
+        .replace("{title}", &track.name)
+        .replace("{artist}", &track.artist)
+        .replace("{album}", &track.album)
 }

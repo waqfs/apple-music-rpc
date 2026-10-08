@@ -5,6 +5,14 @@ ping_interval_seconds = 15
 reconnect_interval_seconds = 5
 
 [activity]
+details_format = "{title}"
+state_format = "{artist}"
+large_text_format = "{album}"
+
+# templates:
+# {title} - track title
+# {artist} - track artist
+# {album} - track album/collection
 
 [apple_music]
 artwork_resolution = 512
