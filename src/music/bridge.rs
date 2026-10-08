@@ -31,6 +31,7 @@ pub struct MusicState {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct TrackState {
+    pub local_id: i64,
     pub name: String,
     pub artist: String,
     pub album: String,
@@ -74,6 +75,7 @@ impl AppleMusicBridge {
         }
 
         let track = self.get_current_track()?;
+        let local_id = self.get_current_track_local_id(track.clone())?;
         let name = self.get_current_track_name(track.clone())?;
         let artist = self.get_current_track_artist(track.clone())?;
         let album = self.get_current_track_album(track.clone())?;
@@ -83,6 +85,7 @@ impl AppleMusicBridge {
         Ok(MusicState {
             state,
             track: Some(TrackState {
+                local_id,
                 name,
                 artist,
                 album,
@@ -103,6 +106,15 @@ impl AppleMusicBridge {
     pub fn get_current_track(&self) -> Result<Retained<AnyObject>, String> {
         let track: Option<Retained<AnyObject>> = unsafe { msg_send![&*self.app, currentTrack] };
         track.ok_or_else(|| "error: failed to get the current track".to_string())
+    }
+
+    pub fn get_current_track_local_id(&self, track: Retained<AnyObject>) -> Result<i64, String> {
+        let id: isize = unsafe { msg_send![&*track, databaseID] };
+        if id == 0 {
+            Err("error: failed to get the current track local ID".to_string())
+        } else {
+            Ok(id as i64)
+        }
     }
 
     pub fn get_current_track_name(&self, track: Retained<AnyObject>) -> Result<String, String> {

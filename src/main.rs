@@ -1,8 +1,10 @@
 use std::{env, path::PathBuf, sync::mpsc};
 
-use crate::{artwork::ArtworkResolver, config::Config, music::bridge::AppleMusicBridge};
+use crate::{
+    config::Config,
+    music::{artwork::ArtworkResolver, bridge::AppleMusicBridge},
+};
 
-mod artwork;
 mod config;
 mod discord;
 mod music;
@@ -27,7 +29,9 @@ fn daemon() -> Result<(), String> {
     let discord = discord::spawn_discord_thread(config.discord.clone());
 
     let (song_update_tx, song_update_rx) = mpsc::channel::<()>();
-    let music = music::spawn_music_thread(config, song_update_rx);
+    music::spawn_music_thread(config, song_update_rx, discord);
+    song_update_tx.send(());
+    music::notification::notify_on_song_update(song_update_tx);
 
     Ok(())
 }
