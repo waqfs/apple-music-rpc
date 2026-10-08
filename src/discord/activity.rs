@@ -16,11 +16,15 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
     activity.insert("status_display_type".to_string(), json!(2));
     activity.insert(
         "details".to_string(),
-        json!(process_template(&config.details_format, &track)),
+        json!(process_template(
+            &config.details_format,
+            &track,
+            url.clone()
+        )),
     );
     activity.insert(
         "state".to_string(),
-        json!(process_template(&config.state_format, &track)),
+        json!(process_template(&config.state_format, &track, url.clone())),
     );
 
     let now = SystemTime::now()
@@ -45,7 +49,7 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
                 "assets".to_string(),
                 json!({
                     "large_image": url,
-                    "large_text": process_template(&config.large_text_format, &track),
+                    "large_text": process_template(&config.large_text_format, &track, Some(url).clone()),
                 }),
             );
         }
@@ -55,7 +59,7 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
     Value::Object(activity)
 }
 
-fn process_template(template: &str, track: &TrackState) -> String {
+fn process_template(template: &str, track: &TrackState, url: Option<String>) -> String {
     template
         .replace("{title}", &track.name)
         .replace("{artist}", &track.artist)
@@ -69,4 +73,5 @@ fn process_template(template: &str, track: &TrackState) -> String {
             ),
         )
         .replace("{duration_s}", &track.duration.ceil().to_string())
+        .replace("{artwork}", url.as_deref().unwrap_or(""))
 }
