@@ -2,7 +2,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::{Map, Value, json};
 
-use crate::{config::ActivityConfig, music::bridge::TrackState};
+use crate::{
+    config::ActivityConfig,
+    music::{artwork::ArtworkDetails, bridge::TrackState},
+};
 
 #[derive(Debug, Clone)]
 pub enum ActivityPresence {
@@ -10,7 +13,11 @@ pub enum ActivityPresence {
     Empty,
 }
 
-pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<String>) -> Value {
+pub fn json_activity(
+    config: &ActivityConfig,
+    track: &TrackState,
+    details: ArtworkDetails,
+) -> Value {
     let mut activity: Map<String, Value> = Map::new();
     activity.insert("type".to_string(), json!(2));
     activity.insert("status_display_type".to_string(), json!(2));
@@ -19,12 +26,16 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
         json!(process_template(
             &config.details_format,
             &track,
-            url.clone()
+            details.url.clone()
         )),
     );
     activity.insert(
         "state".to_string(),
-        json!(process_template(&config.state_format, &track, url.clone())),
+        json!(process_template(
+            &config.state_format,
+            &track,
+            details.url.clone()
+        )),
     );
 
     let now = SystemTime::now()
@@ -43,13 +54,14 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
         }),
     );
 
-    match url {
+    match details.url {
         Some(url) if !url.is_empty() => {
             activity.insert(
                 "assets".to_string(),
                 json!({
                     "large_image": url,
                     "large_text": process_template(&config.large_text_format, &track, Some(url).clone()),
+                    "large_url": &details.view_url
                 }),
             );
         }

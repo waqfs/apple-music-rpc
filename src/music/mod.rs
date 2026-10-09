@@ -16,7 +16,7 @@ use crate::{
     config::{ActivityConfig, Config},
     discord::{DiscordIPC, activity::json_activity},
     music::{
-        artwork::ArtworkResolver,
+        artwork::{ArtworkDetails, ArtworkResolver},
         bridge::{AppleMusicBridge, PlaybackState, TrackState},
     },
 };
@@ -63,7 +63,8 @@ fn music_thread(config: Config, rx: Receiver<()>, discord: DiscordIPC) {
 
                     current_track_id.store(track.local_id, Release);
 
-                    let activity = json_activity(&config.activity, &track, None);
+                    let activity =
+                        json_activity(&config.activity, &track, ArtworkDetails::default());
                     discord.set_activity(activity);
 
                     if last_track_id == Some(track.local_id) {
@@ -109,7 +110,7 @@ fn spawn_artwork_thread(
                 if track.duration > 0.0 {
                     track.progress = track.progress.min(track.duration);
                 }
-                discord.set_activity(json_activity(&config, &track, details.url));
+                discord.set_activity(json_activity(&config, &track, details));
             }
             Err(e) => {
                 eprintln!(

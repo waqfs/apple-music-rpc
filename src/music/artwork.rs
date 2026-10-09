@@ -26,6 +26,15 @@ pub struct ArtworkDetails {
     pub view_url: Option<String>,
 }
 
+impl Default for ArtworkDetails {
+    fn default() -> Self {
+        Self {
+            url: None,
+            view_url: None,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct ArtworkResolver {
     agent: Agent,
