@@ -1,0 +1,9 @@
+
+apple-music-rpc
+
+Usage: apple-music-rpc [--config <path>]
+Options:
+  --config <path>        Specify a custom config file path
+  --debug                Test ScriptingBridge and artwork resolution for the current song
+  --dump-default-config  Print the default config to stdout
+  -h, --help             Show this help message
