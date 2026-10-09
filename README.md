@@ -41,10 +41,12 @@ While this is still in development, compile from source:
 cargo build --release && ./target/release/apple-music-rpc
 ```
 
-You can test the ScriptingBridge and artwork resolution with the `--debug` flag:
-```zsh
-cargo build --release && ./target/release/apple-music-rpc --debug
-```
+Options available through the CLI include:
+- `--config <path>`: specify a custom config file path
+- `--debug`: test ScriptingBridge and artwork resolution
+- `--dump-default-config`: output the default config to stdout
+- `-h`/`--help`: output the help message
+- `-v`/`--version`: output the version
 
 ### License
 This project is licensed under GNU GPLv3, so you can use this for whatever, and forks must disclose source and be under the same license.
