@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf, sync::mpsc};
+use std::{env, path::PathBuf, println, sync::mpsc};
 
 use crate::{
     config::Config,
@@ -18,6 +18,11 @@ fn main() {
 
 fn daemon() -> Result<(), String> {
     let args: Vec<String> = env::args().skip(1).collect();
+    if args.iter().any(|str| str == "-h" || str == "--help") {
+        print_usage();
+        return Ok(());
+    }
+
     let config_path = get_custom_config_path(&args)?.unwrap_or(Config::default_path()?);
     let config = Config::get(&config_path)?;
 
@@ -66,4 +71,13 @@ fn get_custom_config_path(args: &[String]) -> Result<Option<PathBuf>, String> {
         }
     }
     Ok(path)
+}
+
+fn print_usage() {
+    println!("\napple-music-rpc v{}\n", env!("CARGO_PKG_VERSION"));
+    println!("Usage: apple-music-rpc [--config <path>]");
+    println!("Options:");
+    println!("  --config <path> Specify a custom config file path");
+    println!("  --debug         Test ScriptingBridge and artwork resolution for the current song");
+    println!("  -h, --help      Show this help message\n");
 }
