@@ -13,8 +13,11 @@ large_text_format = "{album}"
 # {title} - track title
 # {artist} - track artist
 # {album} - track album/collection
+# {genre} - track genre
+# {year} - track release year
 # {duration} - track duration in mm:ss format
 # {duration_s} - track duration in seconds
+# {play_count} - track play count
 # {artwork} - track artwork url, empty string if not available
 
 [apple_music]

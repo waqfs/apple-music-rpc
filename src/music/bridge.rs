@@ -35,8 +35,11 @@ pub struct TrackState {
     pub name: String,
     pub artist: String,
     pub album: String,
+    pub genre: String,
+    pub year: i64,
     pub duration: f64,
     pub progress: f64,
+    pub play_count: i64,
 }
 
 pub struct AppleMusicBridge {
@@ -79,8 +82,11 @@ impl AppleMusicBridge {
         let name = self.get_current_track_name(track.clone())?;
         let artist = self.get_current_track_artist(track.clone())?;
         let album = self.get_current_track_album(track.clone())?;
+        let genre = self.get_current_track_genre(track.clone())?;
+        let year = self.get_current_track_year(track.clone())?;
         let duration = self.get_current_track_duration(track.clone())?;
         let progress = self.get_current_track_progress()?;
+        let play_count = self.get_current_track_play_count(track.clone())?;
 
         Ok(MusicState {
             state,
@@ -89,8 +95,11 @@ impl AppleMusicBridge {
                 name,
                 artist,
                 album,
+                genre,
+                year,
                 duration,
                 progress,
+                play_count,
             }),
         })
     }
@@ -137,6 +146,22 @@ impl AppleMusicBridge {
             .ok_or_else(|| "error: failed to get the current track album".to_string())
     }
 
+    pub fn get_current_track_genre(&self, track: Retained<AnyObject>) -> Result<String, String> {
+        let genre: Option<Retained<NSString>> = unsafe { msg_send![&*track, genre] };
+        genre
+            .map(|g| g.to_string())
+            .ok_or_else(|| "error: failed to get the current track genre".to_string())
+    }
+
+    pub fn get_current_track_year(&self, track: Retained<AnyObject>) -> Result<i64, String> {
+        let year: isize = unsafe { msg_send![&*track, year] };
+        if year < 0 {
+            Err("error: failed to get the current track year".to_string())
+        } else {
+            Ok(year as i64)
+        }
+    }
+
     pub fn get_current_track_duration(&self, track: Retained<AnyObject>) -> Result<f64, String> {
         let duration: f64 = unsafe { msg_send![&*track, duration] };
         if duration.is_nan() {
@@ -152,6 +177,15 @@ impl AppleMusicBridge {
             Err("error: failed to get the current track progress".to_string())
         } else {
             Ok(progress)
+        }
+    }
+
+    pub fn get_current_track_play_count(&self, track: Retained<AnyObject>) -> Result<i64, String> {
+        let play_count: isize = unsafe { msg_send![&*track, playedCount] };
+        if play_count < 0 {
+            Err("error: failed to get the current track play count".to_string())
+        } else {
+            Ok(play_count as i64)
         }
     }
 }

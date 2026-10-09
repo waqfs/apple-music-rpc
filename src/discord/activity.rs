@@ -64,6 +64,8 @@ fn process_template(template: &str, track: &TrackState, url: Option<String>) -> 
         .replace("{title}", &track.name)
         .replace("{artist}", &track.artist)
         .replace("{album}", &track.album)
+        .replace("{genre}", &track.genre)
+        .replace("{year}", &track.year.to_string())
         .replace(
             "{duration}",
             &format!(
@@ -73,5 +75,6 @@ fn process_template(template: &str, track: &TrackState, url: Option<String>) -> 
             ),
         )
         .replace("{duration_s}", &track.duration.ceil().to_string())
+        .replace("{play_count}", &track.play_count.to_string())
         .replace("{artwork}", url.as_deref().unwrap_or(""))
 }
