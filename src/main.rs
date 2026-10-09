@@ -1,7 +1,7 @@
 use std::{env, path::PathBuf, println, sync::mpsc};
 
 use crate::{
-    config::Config,
+    config::{Config, DEFAULT_CONFIG},
     music::{artwork::ArtworkResolver, bridge::AppleMusicBridge},
 };
 
@@ -20,6 +20,10 @@ fn daemon() -> Result<(), String> {
     let args: Vec<String> = env::args().skip(1).collect();
     if args.iter().any(|str| str == "-h" || str == "--help") {
         print_usage();
+        return Ok(());
+    }
+    if args.iter().any(|str| str == "--dump-default-config") {
+        print!("{DEFAULT_CONFIG}");
         return Ok(());
     }
 
@@ -77,7 +81,10 @@ fn print_usage() {
     println!("\napple-music-rpc v{}\n", env!("CARGO_PKG_VERSION"));
     println!("Usage: apple-music-rpc [--config <path>]");
     println!("Options:");
-    println!("  --config <path> Specify a custom config file path");
-    println!("  --debug         Test ScriptingBridge and artwork resolution for the current song");
-    println!("  -h, --help      Show this help message\n");
+    println!("  --config <path>        Specify a custom config file path");
+    println!(
+        "  --debug                Test ScriptingBridge and artwork resolution for the current song"
+    );
+    println!("  --dump-default-config  Print the default config to stdout");
+    println!("  -h, --help             Show this help message\n");
 }
