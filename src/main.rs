@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf, sync::mpsc};
+use std::{env, path::PathBuf, println, sync::mpsc};
 
 use crate::{
     config::Config,
@@ -42,11 +42,15 @@ fn debug(config: Config) -> Result<(), String> {
     println!("Current state: {:?}", state);
 
     let artwork_resolver = ArtworkResolver::new(&config);
-    let url = match state.track {
+    let details = match state.track {
         Some(track) => artwork_resolver.resolve(&track)?,
         _ => Err("error: failed to get track".to_string())?,
     };
-    println!("Artwork URL: {}", url);
+    println!("Artwork URL: {}", details.url.unwrap_or("None".to_string()));
+    println!(
+        "Track URL: {}",
+        details.view_url.unwrap_or("None".to_string())
+    );
 
     Ok(())
 }
