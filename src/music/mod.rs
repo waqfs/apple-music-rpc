@@ -101,7 +101,7 @@ fn spawn_artwork_thread(
     thread::spawn(move || {
         let start = Instant::now();
         match resolver.resolve(&track) {
-            Ok(url) => {
+            Ok(details) => {
                 if current_track_id.load(Acquire) != track.local_id {
                     return;
                 }
@@ -109,7 +109,7 @@ fn spawn_artwork_thread(
                 if track.duration > 0.0 {
                     track.progress = track.progress.min(track.duration);
                 }
-                discord.set_activity(json_activity(&config, &track, Some(url)));
+                discord.set_activity(json_activity(&config, &track, details.url));
             }
             Err(e) => {
                 eprintln!(

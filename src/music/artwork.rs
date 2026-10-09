@@ -21,6 +21,11 @@ struct SearchResult {
     track_time_millis: Option<u64>,
 }
 
+pub struct ArtworkDetails {
+    pub url: Option<String>,
+    pub view_url: Option<String>,
+}
+
 #[derive(Clone)]
 pub struct ArtworkResolver {
     agent: Agent,
@@ -44,7 +49,7 @@ impl ArtworkResolver {
         }
     }
 
-    pub fn resolve(&self, track: &TrackState) -> Result<String, String> {
+    pub fn resolve(&self, track: &TrackState) -> Result<ArtworkDetails, String> {
         let cleaned_track_name = clean_string(&track.name);
         let squished_track_name = squished_string(&track.name);
         let search_query = format!("{} {}", track.name, track.artist);
@@ -94,12 +99,15 @@ impl ArtworkResolver {
                 name_match && artist_match && duration_match
             });
 
-        let artwork_url = exact_match
-            .and_then(|result| result.artwork_url100)
-            .ok_or_else(|| "error: failed to resolve artwork for the current track".to_string())?;
-        let artwork_url = resize_artwork_url(&artwork_url, self.resolution);
-
-        Ok(artwork_url)
+        return match exact_match {
+            Some(result) => Ok(ArtworkDetails {
+                url: result
+                    .artwork_url100
+                    .map(|url| resize_artwork_url(&url, self.resolution)),
+                view_url: result.track_view_url,
+            }),
+            _ => Err("error: ".to_string()),
+        };
     }
 }
 
