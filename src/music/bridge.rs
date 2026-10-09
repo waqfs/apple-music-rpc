@@ -34,12 +34,12 @@ pub struct TrackState {
     pub local_id: i64,
     pub name: String,
     pub artist: String,
-    pub album: String,
-    pub genre: String,
-    pub year: i64,
+    pub album: Option<String>,
+    pub genre: Option<String>,
+    pub year: Option<i64>,
     pub duration: f64,
     pub progress: f64,
-    pub play_count: i64,
+    pub play_count: Option<i64>,
 }
 
 pub struct AppleMusicBridge {
@@ -81,12 +81,12 @@ impl AppleMusicBridge {
         let local_id = self.get_current_track_local_id(&track)?;
         let name = self.get_current_track_name(&track)?;
         let artist = self.get_current_track_artist(&track)?;
-        let album = self.get_current_track_album(&track)?;
-        let genre = self.get_current_track_genre(&track)?;
-        let year = self.get_current_track_year(&track)?;
+        let album = self.get_current_track_album(&track);
+        let genre = self.get_current_track_genre(&track);
+        let year = self.get_current_track_year(&track);
         let duration = self.get_current_track_duration(&track)?;
         let progress = self.get_current_track_progress()?;
-        let play_count = self.get_current_track_play_count(&track)?;
+        let play_count = self.get_current_track_play_count(&track);
 
         Ok(MusicState {
             state,
@@ -139,27 +139,19 @@ impl AppleMusicBridge {
             .ok_or_else(|| "error: failed to get the current track artist".to_string())
     }
 
-    pub fn get_current_track_album(&self, track: &AnyObject) -> Result<String, String> {
+    pub fn get_current_track_album(&self, track: &AnyObject) -> Option<String> {
         let album: Option<Retained<NSString>> = unsafe { msg_send![track, album] };
-        album
-            .map(|a| a.to_string())
-            .ok_or_else(|| "error: failed to get the current track album".to_string())
+        album.map(|a| a.to_string())
     }
 
-    pub fn get_current_track_genre(&self, track: &AnyObject) -> Result<String, String> {
+    pub fn get_current_track_genre(&self, track: &AnyObject) -> Option<String> {
         let genre: Option<Retained<NSString>> = unsafe { msg_send![track, genre] };
-        genre
-            .map(|g| g.to_string())
-            .ok_or_else(|| "error: failed to get the current track genre".to_string())
+        genre.map(|g| g.to_string())
     }
 
-    pub fn get_current_track_year(&self, track: &AnyObject) -> Result<i64, String> {
+    pub fn get_current_track_year(&self, track: &AnyObject) -> Option<i64> {
         let year: isize = unsafe { msg_send![track, year] };
-        if year < 0 {
-            Err("error: failed to get the current track year".to_string())
-        } else {
-            Ok(year as i64)
-        }
+        if year < 0 { None } else { Some(year as i64) }
     }
 
     pub fn get_current_track_duration(&self, track: &AnyObject) -> Result<f64, String> {
@@ -180,12 +172,12 @@ impl AppleMusicBridge {
         }
     }
 
-    pub fn get_current_track_play_count(&self, track: &AnyObject) -> Result<i64, String> {
+    pub fn get_current_track_play_count(&self, track: &AnyObject) -> Option<i64> {
         let play_count: isize = unsafe { msg_send![track, playedCount] };
         if play_count < 0 {
-            Err("error: failed to get the current track play count".to_string())
+            None
         } else {
-            Ok(play_count as i64)
+            Some(play_count as i64)
         }
     }
 }
