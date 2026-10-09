@@ -5,6 +5,20 @@ ping_interval_seconds = 15
 reconnect_interval_seconds = 5
 
 [activity]
+details_format = "{title}"
+state_format = "{artist}"
+large_text_format = "{album}"
+
+# templates:
+# {title} - track title
+# {artist} - track artist
+# {album} - track album/collection, empty string if not available
+# {genre} - track genre, empty string if not available
+# {year} - track release year, empty string if not available
+# {duration} - track duration in mm:ss format
+# {duration_s} - track duration in seconds
+# {play_count} - track play count, empty string if not available
+# {artwork} - track artwork url, empty string if not available
 
 [apple_music]
 artwork_resolution = 512

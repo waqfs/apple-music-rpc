@@ -21,7 +21,11 @@ pub struct DiscordConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ActivityConfig {}
+pub struct ActivityConfig {
+    pub details_format: String,
+    pub state_format: String,
+    pub large_text_format: String,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppleMusicConfig {

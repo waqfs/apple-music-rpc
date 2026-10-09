@@ -14,10 +14,17 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
     let mut activity: Map<String, Value> = Map::new();
     activity.insert("type".to_string(), json!(2));
     activity.insert("status_display_type".to_string(), json!(2));
-    activity.insert("details".to_string(), json!(&track.name));
+    activity.insert(
+        "details".to_string(),
+        json!(process_template(
+            &config.details_format,
+            &track,
+            url.clone()
+        )),
+    );
     activity.insert(
         "state".to_string(),
-        json!(format!("{} - {}", &track.artist, &track.album)),
+        json!(process_template(&config.state_format, &track, url.clone())),
     );
 
     let now = SystemTime::now()
@@ -42,7 +49,7 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
                 "assets".to_string(),
                 json!({
                     "large_image": url,
-                    "large_text": &track.album,
+                    "large_text": process_template(&config.large_text_format, &track, Some(url).clone()),
                 }),
             );
         }
@@ -50,4 +57,32 @@ pub fn json_activity(config: &ActivityConfig, track: &TrackState, url: Option<St
     }
 
     Value::Object(activity)
+}
+
+fn process_template(template: &str, track: &TrackState, url: Option<String>) -> String {
+    template
+        .replace("{title}", &track.name)
+        .replace("{artist}", &track.artist)
+        .replace("{album}", track.album.as_deref().unwrap_or(""))
+        .replace("{genre}", &track.genre.as_deref().unwrap_or(""))
+        .replace(
+            "{year}",
+            &track.year.map_or_else(|| "".to_string(), |y| y.to_string()),
+        )
+        .replace(
+            "{duration}",
+            &format!(
+                "{:.0}:{:02}",
+                track.duration as u64 / 60,
+                track.duration as u64 % 60
+            ),
+        )
+        .replace("{duration_s}", &track.duration.ceil().to_string())
+        .replace(
+            "{play_count}",
+            &track
+                .play_count
+                .map_or_else(|| "".to_string(), |c| c.to_string()),
+        )
+        .replace("{artwork}", url.as_deref().unwrap_or(""))
 }
