@@ -20,6 +20,13 @@ fn main() {
 
 fn daemon() -> Result<(), String> {
     let args: Vec<String> = env::args().skip(1).collect();
+    if args.iter().any(|str| str == "-v" || str == "--version") {
+        println!(
+            "https://github.com/waqfs/apple-music-rpc v{}",
+            env!("CARGO_PKG_VERSION")
+        );
+        return Ok(());
+    }
     if args.iter().any(|str| str == "-h" || str == "--help") {
         println!("{HELP}");
         return Ok(());
