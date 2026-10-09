@@ -1,13 +1,15 @@
-use std::{env, path::PathBuf, sync::mpsc};
+use std::{env, path::PathBuf, println, sync::mpsc};
 
 use crate::{
-    config::Config,
+    config::{Config, DEFAULT_CONFIG},
     music::{artwork::ArtworkResolver, bridge::AppleMusicBridge},
 };
 
 mod config;
 mod discord;
 mod music;
+
+const HELP: &str = include_str!("USAGE.txt");
 
 fn main() {
     daemon().unwrap_or_else(|err| {
@@ -18,6 +20,22 @@ fn main() {
 
 fn daemon() -> Result<(), String> {
     let args: Vec<String> = env::args().skip(1).collect();
+    if args.iter().any(|str| str == "-v" || str == "--version") {
+        println!(
+            "https://github.com/waqfs/apple-music-rpc v{}",
+            env!("CARGO_PKG_VERSION")
+        );
+        return Ok(());
+    }
+    if args.iter().any(|str| str == "-h" || str == "--help") {
+        println!("{HELP}");
+        return Ok(());
+    }
+    if args.iter().any(|str| str == "--dump-default-config") {
+        print!("{DEFAULT_CONFIG}");
+        return Ok(());
+    }
+
     let config_path = get_custom_config_path(&args)?.unwrap_or(Config::default_path()?);
     let config = Config::get(&config_path)?;
 
