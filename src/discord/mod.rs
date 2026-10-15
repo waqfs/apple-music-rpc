@@ -21,11 +21,11 @@ pub struct DiscordIPC {
 
 impl DiscordIPC {
     pub fn set_activity(&self, activity: Value) {
-        self.tx.send(ActivityPresence::Set(activity));
+        let _ = self.tx.send(ActivityPresence::Set(activity));
     }
 
     pub fn clear_activity(&self) {
-        self.tx.send(ActivityPresence::Empty);
+        let _ = self.tx.send(ActivityPresence::Empty);
     }
 }
 
