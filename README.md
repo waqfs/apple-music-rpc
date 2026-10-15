@@ -17,6 +17,8 @@ reconnect_interval_seconds = 5 # interval between reconnection attempts
 details_format = "{title}" # first line of text, also rendered in the members sidebar
 state_format = "{artist}" # second line of text
 large_text_format = "{album}" # third line of text and also the hover text for the large image
+show_listen_button = true # whether to show a listen button that links to the track
+listen_button_label = "Listen on Apple Music" # the text to display on the button
 
 [apple_music]
 artwork_resolution = 512 # artwork width & height for Discord
