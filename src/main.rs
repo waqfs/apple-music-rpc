@@ -37,6 +37,7 @@ fn daemon() -> Result<(), String> {
     }
 
     let config_path = get_custom_config_path(&args)?.unwrap_or(Config::default_path()?);
+    let config = Config::get(&config_path)?;
     if args.iter().any(|str| str == "-e" || str == "--edit-config") {
         let editor = env::var("EDITOR").unwrap_or_else(|_| "open".to_string());
         let status = std::process::Command::new(editor)
@@ -51,8 +52,6 @@ fn daemon() -> Result<(), String> {
         }
         return Ok(());
     }
-
-    let config = Config::get(&config_path)?;
 
     if args.iter().any(|str| str == "--debug") {
         debug(config)?;
