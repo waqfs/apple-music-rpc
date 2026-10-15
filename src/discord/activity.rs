@@ -68,6 +68,14 @@ pub fn json_activity(
         _ => {}
     }
 
+    activity.insert(
+        "buttons".to_string(),
+        json!([{
+            "label": "Liston on Apple Music",
+            "url": &details.view_url
+        }]),
+    );
+
     Value::Object(activity)
 }
 
