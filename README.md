@@ -47,6 +47,7 @@ Options available through the CLI include:
 - `--config <path>`: specify a custom config file path
 - `--debug`: test ScriptingBridge and artwork resolution
 - `--dump-default-config`: output the default config to stdout
+- `-e`/`--edit-config`: edit the configuration in the default editor
 - `-h`/`--help`: output the help message
 - `-v`/`--version`: output the version
 
