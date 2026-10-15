@@ -9,6 +9,7 @@ details_format = "{title}"
 state_format = "{artist}"
 large_text_format = "{album}"
 show_listen_button = true
+listen_button_label = "Listen on Apple Music"
 
 # templates:
 # {title} - track title

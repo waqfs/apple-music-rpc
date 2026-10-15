@@ -72,7 +72,7 @@ pub fn json_activity(
         activity.insert(
             "buttons".to_string(),
             json!([{
-                "label": "Liston on Apple Music",
+                "label": &config.listen_button_label,
                 "url": &details.view_url
             }]),
         );
