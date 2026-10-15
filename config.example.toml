@@ -8,6 +8,7 @@ reconnect_interval_seconds = 5
 details_format = "{title}"
 state_format = "{artist}"
 large_text_format = "{album}"
+show_listen_button = true
 
 # templates:
 # {title} - track title

@@ -25,6 +25,7 @@ pub struct ActivityConfig {
     pub details_format: String,
     pub state_format: String,
     pub large_text_format: String,
+    pub show_listen_button: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
