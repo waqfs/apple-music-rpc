@@ -1,4 +1,7 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    print, println,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use serde_json::{Map, Value, json};
 
@@ -68,7 +71,7 @@ pub fn json_activity(
         _ => {}
     }
 
-    if config.show_listen_button {
+    if config.show_listen_button && details.view_url.is_some() {
         activity.insert(
             "buttons".to_string(),
             json!([{
