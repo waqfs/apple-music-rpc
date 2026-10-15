@@ -54,13 +54,13 @@ pub fn json_activity(
         }),
     );
 
-    match details.url {
+    match &details.url {
         Some(url) if !url.is_empty() => {
             activity.insert(
                 "assets".to_string(),
                 json!({
                     "large_image": url,
-                    "large_text": process_template(&config.large_text_format, &track, Some(url).clone()),
+                    "large_text": process_template(&config.large_text_format, &track, Some(url.clone())),
                     "large_url": &details.view_url
                 }),
             );
@@ -72,7 +72,7 @@ pub fn json_activity(
         activity.insert(
             "buttons".to_string(),
             json!([{
-                "label": &config.listen_button_label,
+                "label": process_template(&config.listen_button_label, &track, details.url),
                 "url": &details.view_url
             }]),
         );
