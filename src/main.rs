@@ -37,6 +37,21 @@ fn daemon() -> Result<(), String> {
     }
 
     let config_path = get_custom_config_path(&args)?.unwrap_or(Config::default_path()?);
+    if args.iter().any(|str| str == "-e" || str == "--edit-config") {
+        let editor = env::var("EDITOR").unwrap_or_else(|_| "open".to_string());
+        let status = std::process::Command::new(editor)
+            .arg(&config_path)
+            .status()
+            .map_err(|e| format!("error: failed to open config editor: {e}"))?;
+        if !status.success() {
+            return Err(format!(
+                "error: editor exited with non-zero status code: {}",
+                status.code().unwrap_or(-1)
+            ));
+        }
+        return Ok(());
+    }
+
     let config = Config::get(&config_path)?;
 
     if args.iter().any(|str| str == "--debug") {
