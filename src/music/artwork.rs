@@ -15,7 +15,6 @@ struct SearchResponse {
 struct SearchResult {
     track_name: Option<String>,
     artist_name: Option<String>,
-    collection_name: Option<String>,
     track_view_url: Option<String>,
     artwork_url100: Option<String>,
     track_time_millis: Option<u64>,
