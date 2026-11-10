@@ -9,7 +9,7 @@ The activity, and other daemon properties, can be customized in the `config.toml
 The configuration contains the following properties:
 ```toml
 [discord]
-client_id = "1239490006054207550" # Application ID (default is from Vencord's discontinued RPC plugin)
+client_id = "1569536209527640205" # Application ID
 ping_interval_seconds = 15 # interval between pings to Discord
 reconnect_interval_seconds = 5 # interval between reconnection attempts
 
